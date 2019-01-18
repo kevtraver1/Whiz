@@ -12,7 +12,7 @@ Parameters:
     Default: whiz
   GithubOAuthToken:
     Type: String
-    Description: "Whiz app CloudFormation token"
+    Description: "whiz app CloudFormation token"
   
 Resources:
   CodePipeline:
@@ -171,6 +171,7 @@ Resources:
             build:
               commands:
                 - echo Build started on `date`
+                - cd whiz-app-frontend/
                 - npm run build
             post_build:
               commands:
