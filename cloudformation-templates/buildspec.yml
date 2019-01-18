@@ -1,0 +1,222 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters: 
+  ProjectSource: 
+    Type: String
+    Default: "https://github.com/kevtraver1/Whiz"
+    Description: "Source control URL (e.g. Github)"
+  GithubOwner:
+    Type: String
+    Default: kevtraver1
+  GithubRepo:
+    Type: String
+    Default: whiz
+  GithubOAuthToken:
+    Type: String
+    Description: "Whiz app CloudFormation token"
+  
+Resources:
+  CodePipeline:
+    Type: 'AWS::CodePipeline::Pipeline'
+    Properties:
+      RoleArn: !GetAtt CodePipeLineRole.Arn
+      ArtifactStore:
+        Location: !Ref WhizPipelineBucket
+        Type: S3
+      Stages:
+        - 
+          Name: Source
+          Actions: 
+            - 
+              Name: SourceAction
+              ActionTypeId: 
+                Category: Source
+                Owner: ThirdParty
+                Provider: GitHub
+                Version: 1
+              OutputArtifacts: 
+                - 
+                  Name: WhizApp
+              Configuration:
+                Owner: !Ref GithubOwner
+                Repo: !Ref GithubRepo
+                Branch: master
+                OAuthToken: !Ref GithubOAuthToken
+        - 
+          Name: Build
+          Actions: 
+            - 
+              Name: BuildAction
+              ActionTypeId: 
+                Category: Build
+                Owner: AWS
+                Version: 1
+                Provider: CodeBuild
+              InputArtifacts: 
+                - 
+                  Name: WhizApp
+              OutputArtifacts: 
+                - 
+                  Name: WhizAppBuild
+              Configuration:
+                ProjectName: !Ref CodeBuild
+  CodeBuildRole:
+    #IAM rile that allows codebuild to interact with S3 cloudwatch and cloudfront
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - 
+            Effect: Allow
+            Principal:
+              Service:
+                - "codebuild.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: /service-role/
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement: 
+              - 
+                Effect: Allow
+                Action:
+                  - "s3:GetObject"
+                  - "s3:GetObjectVersion"
+                  - "s3:GetBucketVersioning"
+                  - "s3:PutObject"
+                Resource: 
+                  - !GetAtt WhizPipelineBucket.Arn
+                  - !Join ['', [!GetAtt WhizPipelineBucket.Arn, "/*"]]
+              - 
+                Effect: Allow
+                Action:
+                  - "s3:GetObject"
+                  - "s3:GetObjectVersion"
+                  - "s3:GetBucketVersioning"
+                  - "s3:PutObject"
+                  - "s3:PutObjectAcl"
+                Resource: 
+                  - !GetAtt WhizDeployBucket.Arn
+                  - !Join ['', [!GetAtt WhizDeployBucket.Arn, "/*"]]
+              -
+                Effect: Allow
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                  - "cloudfront:CreateInvalidation"
+                Resource:
+                  - "*"
+  CodePipeLineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - 
+            Effect: Allow
+            Principal:
+              Service:
+                - "codepipeline.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement: 
+              - 
+                Effect: Allow
+                Action:
+                  - "s3:GetObject"
+                  - "s3:GetObjectVersion"
+                  - "s3:GetBucketVersioning"
+                  - "s3:PutObject"
+                Resource: 
+                  - !GetAtt WhizPipelineBucket.Arn
+                  - !Join ['', [!GetAtt WhizPipelineBucket.Arn, "/*"]]
+              - 
+                Effect: Allow  
+                Action:
+                  - "codebuild:BatchGetBuilds"
+                  - "codebuild:StartBuild"
+                Resource: "*"
+  CodeBuild:
+    Type: 'AWS::CodeBuild::Project'
+    Properties:
+      Name: !Sub ${AWS::StackName}-CodeBuild
+      ServiceRole: !GetAtt CodeBuildRole.Arn
+      Artifacts:
+        #Source code for build will come from CodePipeline
+        Type: CODEPIPELINE
+        Name: MyProject
+      Source: 
+        Type: CODEPIPELINE
+      Environment:
+        #Linuce Container with node installed
+        ComputeType: BUILD_GENERAL1_SMALL
+        Type: LINUX_CONTAINER
+        Image: "aws/codebuild/nodejs:8.11.0"
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: !Sub |
+          version: 0.1
+          phases:
+            pre_build:
+              commands:
+                - echo Installing source NPM dependencies...
+                - npm install
+            build:
+              commands:
+                - echo Build started on `date`
+                - npm run build
+            post_build:
+              commands:
+                #copy the contents of /build to S3
+                - aws s3 cp --recursive --acl public-read ./build s3://${WhizDeployBucket}/ 
+                #set cahce-control headers for servicers-worker.js to prevent browser caching
+                - aws s3 cp --acl public-read --cache-control="max-age=0, no-cache, no-store, must-revalidate" ./build/service-worker.js s3://${WhizDeployBucket}/
+                #set the cahce-control headers for index.html to prevent browswer caching
+                - aws s3 cp --acl public-read --cache-control="max-age=0, no-cache, no-store, must-revalidate" ./build/index.html s3://${WhizDeployBucket}/
+                #invalaidate cloudfront cahce for index.html and service-worker.js
+                #to force cloudfront to update its edge locations with new versions
+                - aws cloudfront create-invalidation --distribution-id ${Distribution} --paths /index.html /service-worker.js
+          artifacts:
+            files:
+              - '**/*'
+            base-directory: build
+  WhizPipelineBucket: 
+    #Temp bucket for storing build artifacts during pipeline
+    Type: 'AWS::S3::Bucket'
+    Properties: {}
+  WhizDeployBucket:
+  #create deployment bucket and configure S3 bucket as a website
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: error.html
+  Distribution:
+  #create CDN for distribution
+    Type: "AWS::CloudFront::Distribution"
+    Properties:
+      DistributionConfig:
+        Origins:
+          - 
+          #Use the WhizDeployBucket as CDN origin
+            DomainName: !GetAtt WhizDeployBucket.DomainName
+            Id: !Ref WhizDeployBucket
+            S3OriginConfig:
+              OriginAccessIdentity: ''
+        DefaultRootObject: index.html
+        Enabled: true
+        #Configure the caching behavior for CDN
+        DefaultCacheBehavior: 
+          MinTTL: 86400 #1 day
+          MaxTTL: 31536000 #1 year
+          ForwardedValues: 
+            QueryString: true
+          TargetOriginId: !Ref WhizDeployBucket
+          ViewerProtocolPolicy: "redirect-to-https" # force HTTPS
