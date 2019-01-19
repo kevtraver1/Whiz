@@ -9,7 +9,7 @@ class App extends Component {
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
           <p>
-            Pipeline is Working for frontend
+            Welcome to Whiz
           </p>
         </header>
       </div>
