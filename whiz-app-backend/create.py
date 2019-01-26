@@ -27,7 +27,8 @@ def create_bathroom():
 	bathroom_entry["Geo_Hash_Key"]	= {"N":str(geo_hash_key)}
 	bathroom_entry["Geo_Hash"]		= {"N":str(geo_hash)}	
 	dynamodb.put_item(TableName='Whiz-Bathroom-Table', Item=bathroom_entry)
-	
+	lambda_client = boto3.client('lambda')
+    invoke_response = lambda_client.invoke(FunctionName="whiz-app-bathroom-item-get",InvocationType='RequestResponse')
 	return jsonify(bathroom_entry)
 
 def calculate_geo_hash(latidue,longitude,precession,result_type):
