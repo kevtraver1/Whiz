@@ -8,7 +8,7 @@
         "s3_bucket": "whiz-lambda-upload"
     },
     "get": {
-        "app_function": "get.app",
+        "app_function": "get_bathroom.app",
         "aws_region": "us-east-1",
         "profile_name": "default",
         "project_name": "whiz-app-bathroom-item",

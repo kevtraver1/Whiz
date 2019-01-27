@@ -1,38 +1,56 @@
 from flask import Flask,jsonify,request
 import boto3
 import uuid
+import json
 app = Flask(__name__)
 @app.route("/create_bathroom", methods=['GET'])
 def create_bathroom():
-	latitude 	= float(request.args.get('latitude'))
-	longitude 	= float(request.args.get('longitude'))
-	user_id 	= request.args.get('user_id')
-	rating 		= float(request.args.get('rating'))
-	precision 	= 12
-	geo_hash 	= calculate_geo_hash(longitude,latitude,precision,"deciaml")
-	#geo_hash is decimal 
-	#create geo_hash_key (first 4 number in hash)
-	#hash//10^(lenght-4) will get the first 4 numbers in geo_hash
-	geo_hash_len= len(str(abs(geo_hash)))
-	geo_hash_key= geo_hash//(10**(geo_hash_len-4))
+    #initiate varables from incoming parameters
+    try:
+        latitude 	= float(request.args.get('latitude'))
+        longitude 	= float(request.args.get('longitude'))
+        user_id 	= str(request.args.get('user_id'))
+        rating 		= float(request.args.get('rating'))
+    except ValueError:
+        return jsonify({"Error":"Invalid Input"})
+    except Exception as e:
+        return jsonify({"Error":str(e)})
+    precision 	= 12#max precsion in 37.2mm	×	18.6mm accuracy
+    geo_hash 	= calculate_geo_hash(longitude,latitude,precision,"deciaml")
+    #geo_hash is decimal 
+    #create geo_hash_key (first 4 number in hash)
+    #hash//10^(lenght-4) will get the first 4 numbers in geo_hash
+    geo_hash_len= len(str(abs(geo_hash)))
+    geo_hash_key= geo_hash//(10**(geo_hash_len-4))
 
-	dynamodb = boto3.client('dynamodb')
-	bathroom_entry = {}
-	bathroom_entry["User_Id"] 		= {"S":user_id}
-	bathroom_entry["Bathroom_Id"] 	= {"S":str(uuid.uuid4())}
-	bathroom_entry["Latitude"]		= {"N":str(latitude)}
-	bathroom_entry["Longitude"] 	= {"N":str(longitude)}
-	bathroom_entry["Rating"]		= {"N":str(rating)}
-	bathroom_entry["Rating_Weight"]	= {"N":str(1)}
-	bathroom_entry["Geo_Hash_Key"]	= {"N":str(geo_hash_key)}
-	bathroom_entry["Geo_Hash"]		= {"N":str(geo_hash)}	
-	dynamodb.put_item(TableName='Whiz-Bathroom-Table', Item=bathroom_entry)
-	lambda_client = boto3.client('lambda')
-    invoke_response = lambda_client.invoke(FunctionName="whiz-app-bathroom-item-get",InvocationType='RequestResponse')
-	return jsonify(bathroom_entry)
-
+    bathroom_entry = {}
+    bathroom_entry["User_Id"] 		= {"S":user_id}
+    bathroom_entry["Bathroom_Id"] 	= {"S":str(uuid.uuid4())}
+    bathroom_entry["Latitude"]		= {"N":str(latitude)}
+    bathroom_entry["Longitude"] 	= {"N":str(longitude)}
+    bathroom_entry["Rating"]		= {"N":str(rating)}
+    bathroom_entry["Rating_Weight"]	= {"N":str(1)}
+    bathroom_entry["Geo_Hash_Key"]	= {"N":str(geo_hash_key)}
+    bathroom_entry["Geo_Hash"]		= {"N":str(geo_hash)}	
+    #establish connection to dynamodb
+    dynamodb = boto3.client('dynamodb')
+    #put item into dynamdb and return https status of request
+    response = dynamodb.put_item(TableName='Whiz-Bathroom-Table', Item=bathroom_entry)
+    bathroom_entry["Status"] = response['HTTPStatusCode']
+    return jsonify(bathroom_entry)
+#calcualte geo_hash based on users longitude,latitude,and pression
 def calculate_geo_hash(latidue,longitude,precession,result_type):
-    #validate input
+    """
+    https://en.wikipedia.org/wiki/Geohash alogrithm source
+    Input:
+        latitude(float):lattiude of postion
+        longitude(float):longitude of postion
+        precession(int):how long the hash is, longer the more accurate
+        result_type(str):return as hash,decimal,binary
+    Output:
+        return based on result type but will be geohash for latitude and longitude and lenght of hash based off preccssion
+    """
+    #intate varibales needed for geo-hash calcualtions
     geo_hash = ""
     max_lat = 90.0
     min_lat = -90.0
@@ -44,10 +62,15 @@ def calculate_geo_hash(latidue,longitude,precession,result_type):
     index = 0
     result = False
     geo_bits = ""
+    #loop until geo_hash has reached desired precession
     while len(geo_hash)<precession:
+        #alternate bewteen longitude bits and latitude bits, even for long and odd for lat of each bit
         if evenBit:
             #bisect E-W longitude
+            #calcualte mid point between current min max longitude
             mid_long = (min_long+max_long)/2
+            #if longitude bigger then mid then mid is new minium value,else its new maxium value
+            #set bit to one if larger and zero for smaller
             if longitude >= mid_long:
                 index = index*2+1
                 min_long = mid_long
@@ -58,7 +81,9 @@ def calculate_geo_hash(latidue,longitude,precession,result_type):
                 geo_bits += "0"
         else:
             #bisect N-S latidue
+            #calcualte mid point between current min max latidue
             mid_lat = (min_lat+max_lat)/2
+            #if latidue bigger then mid then mid is new minium value,else its new maxium value
             if latidue >= mid_lat:
                 index = index*2+1
                 min_lat = mid_lat
@@ -67,14 +92,17 @@ def calculate_geo_hash(latidue,longitude,precession,result_type):
                 index = index*2
                 max_lat = mid_lat
                 geo_bits += "0"
+        #flip to go between longitude and latitde 
         evenBit = not evenBit
         
-        
+        #to genearte hash base 32
         bits += 1
         if bits == 5:
+            #5 bits gives us a character: append it and start over
             geo_hash += base32[index]
             bits = 0
             index = 0
+    #return based of type requested
     if result_type == "deciaml":
         result = int(geo_bits,2)
     elif result_type == "binary":
