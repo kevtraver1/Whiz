@@ -2,10 +2,11 @@ from flask import Flask,jsonify,request
 import boto3
 import uuid
 import json
+import os
 app = Flask(__name__)
 @app.route("/create_bathroom", methods=['GET'])
 def create_bathroom():
-    #initiate varables from incoming parameters
+    #initiate varables from incoming parameters and handle errors
     try:
         latitude 	= float(request.args.get('latitude'))
         longitude 	= float(request.args.get('longitude'))
@@ -20,23 +21,25 @@ def create_bathroom():
     #geo_hash is decimal 
     #create geo_hash_key (first 4 number in hash)
     #hash//10^(lenght-4) will get the first 4 numbers in geo_hash
-    geo_hash_len= len(str(abs(geo_hash)))
-    geo_hash_key= geo_hash//(10**(geo_hash_len-4))
+    try:
+        geo_hash_len= len(str(abs(geo_hash)))
+        geo_hash_key= geo_hash//(10**(geo_hash_len-4))
 
-    bathroom_entry = {}
-    bathroom_entry["User_Id"] 		= {"S":user_id}
-    bathroom_entry["Bathroom_Id"] 	= {"S":str(uuid.uuid4())}
-    bathroom_entry["Latitude"]		= {"N":str(latitude)}
-    bathroom_entry["Longitude"] 	= {"N":str(longitude)}
-    bathroom_entry["Rating"]		= {"N":str(rating)}
-    bathroom_entry["Rating_Weight"]	= {"N":str(1)}
-    bathroom_entry["Geo_Hash_Key"]	= {"N":str(geo_hash_key)}
-    bathroom_entry["Geo_Hash"]		= {"N":str(geo_hash)}	
-    #establish connection to dynamodb
-    dynamodb = boto3.client('dynamodb')
-    #put item into dynamdb and return https status of request
-    response = dynamodb.put_item(TableName='Whiz-Bathroom-Table', Item=bathroom_entry)
-    bathroom_entry["Status"] = response['HTTPStatusCode']
+        bathroom_entry = {}
+        bathroom_entry["User_Id"] 		= {"S":user_id}
+        bathroom_entry["Bathroom_Id"] 	= {"S":str(uuid.uuid4())}
+        bathroom_entry["Latitude"]		= {"N":str(latitude)}
+        bathroom_entry["Longitude"] 	= {"N":str(longitude)}
+        bathroom_entry["Rating"]		= {"N":str(rating)}
+        bathroom_entry["Rating_Weight"]	= {"N":str(1)}
+        bathroom_entry["Geo_Hash_Key"]	= {"N":str(geo_hash_key)}
+        bathroom_entry["Geo_Hash"]		= {"N":str(geo_hash)}	
+        #establish connection to dynamodb
+        dynamodb = boto3.client('dynamodb')
+        #put item into dynamdb and return https status of request
+        dynamodb.put_item(TableName=os.environ['WhizBathroomTable'], Item=bathroom_entry)
+    except Exception as e:
+        return jsonify({"Error":str(e)})
     return jsonify(bathroom_entry)
 #calcualte geo_hash based on users longitude,latitude,and pression
 def calculate_geo_hash(latidue,longitude,precession,result_type):
