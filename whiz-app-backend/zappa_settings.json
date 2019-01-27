@@ -16,7 +16,7 @@
         "s3_bucket": "whiz-lambda-upload"
     },
     "list": {
-        "app_function": "list.app",
+        "app_function": "list_bathrooms.app",
         "aws_region": "us-east-1",
         "profile_name": "default",
         "project_name": "whiz-app-bathroom-item",
