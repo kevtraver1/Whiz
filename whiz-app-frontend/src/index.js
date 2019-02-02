@@ -22,9 +22,21 @@ Amplify.configure({
     API: {
       endpoints: [
         {
-          name: "notes",
-          endpoint: config.apiGateway.URL,
-          region: config.apiGateway.REGION
+          name: "list",
+          endpoint: config.list_api_gateway.URL,
+          region: config.list_api_gateway.REGION
+        },
+        {
+          name: "create",
+          endpoint: config.create_api_gateway.URL,
+          region: config.create_api_gateway.REGION
+        },
+        {
+          name: "app",
+          endpoint: config.app_api_gateway.URL,
+          region: config.app_api_gateway.REGION,
+          mode: 'cors',
+          method: 'GET',
         },
       ]
     }

@@ -33,7 +33,8 @@ def create_bathroom():
         bathroom_entry["Rating"]		= {"N":str(rating)}
         bathroom_entry["Rating_Weight"]	= {"N":str(1)}
         bathroom_entry["Geo_Hash_Key"]	= {"N":str(geo_hash_key)}
-        bathroom_entry["Geo_Hash"]		= {"N":str(geo_hash)}	
+        bathroom_entry["Geo_Hash"]		= {"N":str(geo_hash)}
+        #creation time,address 	
         #establish connection to dynamodb
         dynamodb = boto3.client('dynamodb')
         #put item into dynamdb and return https status of request

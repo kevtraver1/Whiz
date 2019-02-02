@@ -30,5 +30,13 @@
         "project_name": "whiz-app-bathroom-item",
         "runtime": "python3.6",
         "s3_bucket": "whiz-lambda-upload"
+    },
+    "app": {
+        "app_function": "app.app",
+        "aws_region": "us-east-1",
+        "profile_name": "default",
+        "project_name": "whiz-app-bathroom-test",
+        "runtime": "python3.6",
+        "s3_bucket": "whiz-lambda-upload"
     }
 }

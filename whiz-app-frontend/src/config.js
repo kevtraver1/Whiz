@@ -4,9 +4,18 @@ export default {
       REGION: "us-east-1",
       BUCKET: "whiz-app-uploads"
     },
-    apiGateway: {
+    list_api_gateway: {
       REGION: "us-east-1",
-      URL: "https://9n980grtv6.execute-api.us-east-1.amazonaws.com/"
+      URL: "https://mk6od1eccb.execute-api.us-east-1.amazonaws.com/list"
+    },
+    create_api_gateway: {
+      REGION: "us-east-1",
+      URL: "https://wdi41mc2z1.execute-api.us-east-1.amazonaws.com/create"
+    },
+    app_api_gateway: {
+      REGION: "us-east-1",
+      URL: "https://9ne5xsj087.execute-api.us-east-1.amazonaws.com/dev"
+      //URL: "https://uv63c3dai7.execute-api.us-east-1.amazonaws.com/app"
     },
     cognito: {
       REGION: "us-east-1",
