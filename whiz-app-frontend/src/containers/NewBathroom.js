@@ -4,8 +4,11 @@ import LoaderButton from "../components/LoaderButton";
 import config from "../config";
 import "./NewBathroom.css";
 import { API } from "aws-amplify";
+import { GoogleApiWrapper, InfoWindow, Marker } from 'google-maps-react';
+import CurrentLocation from './Map';
 
-export default class NewBathroom extends Component {
+
+export class NewBathroom extends Component {
   constructor(props) {
     super(props);
 
@@ -15,12 +18,35 @@ export default class NewBathroom extends Component {
       isLoading: null,
       rating: "",
       review:  "",
-      location: ""
+      latitude: "",
+      longitude: "",
+      error:null,
+      showingInfoWindow: false,  //Hides or the shows the infoWindow
+      activeMarker: {},          //Shows the active marker upon click
+      selectedPlace: {},          //Shows the infoWindow to the selected place upon a marker
+
     };
   }
 
+  onMarkerClick = (props, marker, e) =>
+    this.setState({
+      selectedPlace: props,
+      activeMarker: marker,
+      showingInfoWindow: true
+    });
+
+  onClose = props => {
+    if (this.state.showingInfoWindow) {
+      this.setState({
+        showingInfoWindow: false,
+        activeMarker: null
+      });
+    }
+  };
+
+  
   validateForm() {
-    return this.state.rating.length > 0;
+    return this.state.rating.length > 0 && this.state.latitude.length > 0 && this.state.longitude.length > 0;
   }
 
   handleChange = event => {
@@ -47,7 +73,6 @@ export default class NewBathroom extends Component {
       await this.createBathroom({
         rating: this.state.rating,
         review:  this.state.review,
-        location: this.state.location
       });
       //this.props.history.push("/");
     } catch (e) {
@@ -60,7 +85,7 @@ export default class NewBathroom extends Component {
     bathroom["latitude"]  = 40.649908
     bathroom["longitude"] = -73.937239
     console.log(bathroom)
-    return API.post("create", "/create_bathroom", {
+    return API.post("create", `/create_bathroom`, {
       body: bathroom
     });
   }
@@ -84,18 +109,25 @@ export default class NewBathroom extends Component {
               componentClass="textarea"
             />
           </FormGroup>
-          <FormGroup controlId="location">
-          <ControlLabel>location</ControlLabel>
-            <FormControl
-              onChange={this.handleChange}
-              value={this.state.location}
-              componentClass="textarea"
-            />
-          </FormGroup> 
           <FormGroup controlId="file">
             <ControlLabel>Attachment</ControlLabel>
             <FormControl onChange={this.handleFileChange} type="file" />
           </FormGroup>
+          <CurrentLocation
+        centerAroundCurrentLocation
+        google={this.props.google}
+      >
+        <Marker onClick={this.onMarkerClick} name={'current location'} />
+        <InfoWindow
+          marker={this.state.activeMarker}
+          visible={this.state.showingInfoWindow}
+          onClose={this.onClose}
+        >
+          <div>
+            <h4>{this.state.selectedPlace.name}</h4>
+          </div>
+        </InfoWindow>
+      </CurrentLocation>
           <LoaderButton
             block
             bsStyle="primary"
@@ -111,3 +143,7 @@ export default class NewBathroom extends Component {
     );
   }
 }
+
+export default GoogleApiWrapper({
+  apiKey: 'AIzaSyCd1aKPVphlEKHiRYbfFAhskWl67Apd6sg'
+})(NewBathroom);
