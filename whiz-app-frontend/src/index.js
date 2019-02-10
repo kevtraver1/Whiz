@@ -34,9 +34,7 @@ Amplify.configure({
         {
           name: "app",
           endpoint: config.app_api_gateway.URL,
-          region: config.app_api_gateway.REGION,
-          mode: 'cors',
-          method: 'GET',
+          region: config.app_api_gateway.REGION
         },
       ]
     }

@@ -14,7 +14,8 @@ export default class NewBathroom extends Component {
     this.state = {
       isLoading: null,
       rating: "",
-      review:  ""
+      review:  "",
+      location: ""
     };
   }
 
@@ -45,7 +46,8 @@ export default class NewBathroom extends Component {
     try {
       await this.createBathroom({
         rating: this.state.rating,
-        review:  this.state.review
+        review:  this.state.review,
+        location: this.state.location
       });
       //this.props.history.push("/");
     } catch (e) {
@@ -55,6 +57,9 @@ export default class NewBathroom extends Component {
   }
   
   createBathroom(bathroom) {
+    bathroom["latitude"]  = 40.649908
+    bathroom["longitude"] = -73.937239
+    console.log(bathroom)
     return API.post("create", "/create_bathroom", {
       body: bathroom
     });
@@ -76,6 +81,14 @@ export default class NewBathroom extends Component {
             <FormControl
               onChange={this.handleChange}
               value={this.state.review}
+              componentClass="textarea"
+            />
+          </FormGroup>
+          <FormGroup controlId="location">
+          <ControlLabel>location</ControlLabel>
+            <FormControl
+              onChange={this.handleChange}
+              value={this.state.location}
               componentClass="textarea"
             />
           </FormGroup> 

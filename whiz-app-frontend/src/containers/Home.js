@@ -27,10 +27,16 @@ export default class Home extends Component {
     this.setState({ isLoading: false });
   }
   
-  bathrooms() {
-    
-    var test = "foobar"
-    return API.get("app", `/?test=${test}`);
+  bathrooms() { 
+    var bathroom_item = {user_id:this.props.username,rating: "5.5", review: "blueberries", latitude: 50.649908, longitude: -50.937239}
+    var rating = bathroom_item.rating;
+    var latitude = bathroom_item.latitude;
+    var longitude = bathroom_item.longitude;
+    var user_id = bathroom_item.user_id;
+    console.log(bathroom_item)
+    return API.post("create", `/create_bathroom?latitude=${latitude}&longitude=${longitude}&rating=${rating}&user_id=${user_id}`, {
+      body:  bathroom_item
+    });
   }
   renderBathroomsList(bathrooms) {
     console.log("Response");

@@ -11,13 +11,16 @@ class App extends Component {
   
     this.state = {
       isAuthenticated: false,
-      isAuthenticating: true
+      isAuthenticating: true,
+      username:       ""
     };
   }
   async componentDidMount() {
     try {
       await Auth.currentSession();
       this.userHasAuthenticated(true);
+      var session = await Auth.currentSession()
+      this.setUsername(session.getIdToken().decodePayload()["cognito:username"]);
     }
     catch(e) {
       if (e !== 'No current user') {
@@ -30,17 +33,23 @@ class App extends Component {
   userHasAuthenticated = authenticated => {
     this.setState({ isAuthenticated: authenticated });
   }
+  setUsername= user => {
+    this.setState({ username: user });
+  }
   handleLogout = async event => {
     await Auth.signOut();
   
     this.userHasAuthenticated(false);
+    this.setUsername("");
   
     this.props.history.push("/login");
   }
   render() {
     const childProps = {
-      isAuthenticated: this.state.isAuthenticated,
-      userHasAuthenticated: this.userHasAuthenticated
+      isAuthenticated:       this.state.isAuthenticated,
+      userHasAuthenticated: this.userHasAuthenticated,
+      username:             this.state.username,
+      setUsername:          this.setUsername
     };
   
     return (

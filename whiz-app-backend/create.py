@@ -3,19 +3,24 @@ import boto3
 import uuid
 import json
 import os
+import datetime
 app = Flask(__name__)
-@app.route("/create_bathroom", methods=['GET'])
+@app.route("/create_bathroom", methods=['GET','POST'])
 def create_bathroom():
     #initiate varables from incoming parameters and handle errors
     try:
-        latitude 	= float(request.args.get('latitude'))
-        longitude 	= float(request.args.get('longitude'))
-        user_id 	= str(request.args.get('user_id'))
-        rating 		= float(request.args.get('rating'))
+        error_event     = json.dumps({"event":request.environ.get('lambda.event', None)})
+        latitude 	    = float(request.args.get('latitude'))
+        longitude 	    = float(request.args.get('longitude'))
+        user_id 	    = "Hard_Coded"#str(request.args.get('user_id'))
+        rating 		    = float(request.args.get('rating'))
+        #review          = str(request.args.get('review'))
+        creation_date   = datetime.datetime.now()
+        #convert long/lat to address
     except ValueError:
         return jsonify({"Error":"Invalid Input"})
     except Exception as e:
-        return jsonify({"Error":str(e)})
+        return jsonify({"Error":str(e),"Dict":error_event})
     precision 	= 12#max precsion in 37.2mm	×	18.6mm accuracy
     geo_hash 	= calculate_geo_hash(longitude,latitude,precision,"deciaml")
     #geo_hash is decimal 
@@ -31,9 +36,11 @@ def create_bathroom():
         bathroom_entry["Latitude"]		= {"N":str(latitude)}
         bathroom_entry["Longitude"] 	= {"N":str(longitude)}
         bathroom_entry["Rating"]		= {"N":str(rating)}
+        #bathroom_entry["Review"]		= {"N":str(review)}
         bathroom_entry["Rating_Weight"]	= {"N":str(1)}
         bathroom_entry["Geo_Hash_Key"]	= {"N":str(geo_hash_key)}
         bathroom_entry["Geo_Hash"]		= {"N":str(geo_hash)}
+        bathroom_entry["Creation_Date"]  = {"S":str(creation_date)}
         #creation time,address 	
         #establish connection to dynamodb
         dynamodb = boto3.client('dynamodb')
@@ -119,4 +126,5 @@ def calculate_geo_hash(latidue,longitude,precession,result_type):
 
 
 if __name__=="__main__":
-	app.run()
+    app.debug = True
+    app.run()

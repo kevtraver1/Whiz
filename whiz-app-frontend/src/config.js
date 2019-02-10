@@ -10,17 +10,16 @@ export default {
     },
     create_api_gateway: {
       REGION: "us-east-1",
-      URL: "https://wdi41mc2z1.execute-api.us-east-1.amazonaws.com/create"
+      URL: "https://wdi41mc2z1.execute-api.us-east-1.amazonaws.com/create/"
     },
     app_api_gateway: {
       REGION: "us-east-1",
-      URL: "https://9ne5xsj087.execute-api.us-east-1.amazonaws.com/dev"
-      //URL: "https://uv63c3dai7.execute-api.us-east-1.amazonaws.com/app"
+      URL: "https://uv63c3dai7.execute-api.us-east-1.amazonaws.com/app"
     },
     cognito: {
       REGION: "us-east-1",
-      USER_POOL_ID: "us-east-1_9PgJGp5T8",
-      APP_CLIENT_ID: "78hq54l5qju44oqus9hhh938sj",
-      IDENTITY_POOL_ID: "us-east-1:80d447bf-efd0-41cf-9323-2682ecb92938"
+      USER_POOL_ID: "us-east-1_tdd3MGwY1",
+      APP_CLIENT_ID: "70qr61gkgp29isr37cjgu1j1s1",
+      IDENTITY_POOL_ID: "us-east-1:c066342f-27db-485c-8838-fa70c8f4d9d3"
     }
   };
