@@ -41,6 +41,9 @@ export class CurrentLocation extends React.Component {
         map.panTo(center);
         }
     }
+
+
+
     componentDidMount() {
         if (this.props.centerAroundCurrentLocation) {
           if (navigator && navigator.geolocation) {
@@ -75,7 +78,7 @@ export class CurrentLocation extends React.Component {
             {},
             {
               center: center,
-              zoom: zoom
+              zoom: zoom,
             }
           );
     
@@ -83,6 +86,7 @@ export class CurrentLocation extends React.Component {
           this.map = new maps.Map(node, mapConfig);
         }
       }
+
       renderChildren() {
         const { children } = this.props;
     
@@ -93,7 +97,7 @@ export class CurrentLocation extends React.Component {
           return React.cloneElement(c, {
             map: this.map,
             google: this.props.google,
-            mapCenter: this.state.currentLocation
+            mapCenter: this.state.currentLocation,
           });
         });
       }
@@ -119,5 +123,5 @@ CurrentLocation.defaultProps = {
     lng: -74.0060
   },
   centerAroundCurrentLocation: false,
-  visible: true
+  visible: true,
 };
