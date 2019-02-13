@@ -124,13 +124,11 @@ export class NewBathroom extends Component {
   }
   
   createBathroom(bathroom) {
-    bathroom["latitude"]  = 40.649908
-    bathroom["longitude"] = -73.937239
     //var user_id = this.props.username
-    console.log(this.activeMarker)
     console.log(bathroom)
-    return API.post("create", `/create_bathroom`, {
-      body: bathroom
+    console.log(this.state.currentLocation)
+    console.log(this.state.address)
+    return API.post("create", `/create_bathroom?username=${this.props.username}&review=${bathroom.review}&rating=${bathroom.rating}&address=${this.state.address}&latitude=${this.state.currentLocation.lat}&longitude=${this.state.currentLocation.lng}`, {      body: bathroom
     });
   }
 

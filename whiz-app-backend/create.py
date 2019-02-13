@@ -5,6 +5,7 @@ import json
 import os
 import datetime
 app = Flask(__name__)
+
 @app.route("/create_bathroom", methods=['GET','POST'])
 def create_bathroom():
     #initiate varables from incoming parameters and handle errors
@@ -17,22 +18,21 @@ def create_bathroom():
         review          = str(request.args.get('review'))
         address         = str(request.args.get('address'))
         creation_date   = datetime.datetime.now()
-        #convert long/lat to address
     except ValueError:
         return jsonify({"Error":"Invalid Input"})
     except Exception as e:
-        return jsonify({"Error":str(e),"Dict":error_event})
-    precision 	= 12#max precsion in 37.2mm	×	18.6mm accuracy
-    geo_hash 	= calculate_geo_hash(longitude,latitude,precision,"deciaml")
-    #geo_hash is decimal 
-    #create geo_hash_key (first 4 number in hash)
-    #hash//10^(lenght-4) will get the first 4 numbers in geo_hash
+        return jsonify({"Error":str(e),"Dict":error_event})  
     try:
+        precision 	= 12#max precsion in 37.2mm	×	18.6mm accuracy
+        geo_hash 	= calculate_geo_hash(longitude,latitude,precision,"deciaml")
+        #geo_hash is decimal 
+        #create geo_hash_key (first 4 number in hash)
+        #hash//10^(lenght-4) will get the first 4 numbers in geo_hash
         geo_hash_len= len(str(abs(geo_hash)))
         geo_hash_key= geo_hash//(10**(geo_hash_len-4))
-
+        #create hash to send to dynomadb, format is {type:value} type is S for string N for number L for list
         bathroom_entry = {}
-        bathroom_entry["User_Id"] 		= {"S":user_id}
+        bathroom_entry["User_Id"] 		= {"S":str(user_id)}
         bathroom_entry["Bathroom_Id"] 	= {"S":str(uuid.uuid4())}
         bathroom_entry["Latitude"]		= {"N":str(latitude)}
         bathroom_entry["Longitude"] 	= {"N":str(longitude)}
@@ -43,7 +43,6 @@ def create_bathroom():
         bathroom_entry["Geo_Hash"]		= {"N":str(geo_hash)}
         bathroom_entry["Creation_Date"] = {"S":str(creation_date)}
         bathroom_entry["Address"]       = {"S":str(address)}
-        #creation time,address 	
         #establish connection to dynamodb
         dynamodb = boto3.client('dynamodb')
         #put item into dynamdb and return https status of request
@@ -128,5 +127,4 @@ def calculate_geo_hash(latidue,longitude,precession,result_type):
 
 
 if __name__=="__main__":
-    #app.debug = True
     app.run()
