@@ -37,7 +37,7 @@ def create_bathroom():
         bathroom_entry["Latitude"]		= {"N":str(latitude)}
         bathroom_entry["Longitude"] 	= {"N":str(longitude)}
         bathroom_entry["Rating"]		= {"N":str(rating)}
-        bathroom_entry["Review"]		= {"S":str(review)}
+        bathroom_entry["Reviews"]		= {"M":{str(user_id):{"S":str(review)}}}
         bathroom_entry["Rating_Weight"]	= {"N":str(1)}
         bathroom_entry["Geo_Hash_Key"]	= {"N":str(geo_hash_key)}
         bathroom_entry["Geo_Hash"]		= {"N":str(geo_hash)}

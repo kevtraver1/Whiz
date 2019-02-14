@@ -6,11 +6,13 @@ import "./NewBathroom.css";
 import { API } from "aws-amplify";
 import { GoogleApiWrapper, InfoWindow, Marker, Map } from 'google-maps-react';
 import Geocode from "react-geocode";
+import StarRatingComponent from 'react-star-rating-component';
 Geocode.setApiKey('AIzaSyC8nqzSV8q-WBq5IeKMDgUtQDTqeK2F7NA');
 
 const mapStyles = {
-  width: '50%',
-  height: '50%'
+  width: '100%',
+  height: '50%',
+  
 };
 
 export class NewBathroom extends Component {
@@ -21,7 +23,7 @@ export class NewBathroom extends Component {
     const { lat, lng } = this.props.initialCenter;
     this.state = {
       isLoading: null,
-      rating: "",
+      rating: 1,
       review:  "",
       address: "Address",
       error:null,
@@ -55,7 +57,9 @@ export class NewBathroom extends Component {
       });
     }
   };
-
+  onStarClick(nextValue, prevValue, name) {
+    this.setState({rating: nextValue});
+  }
   componentDidMount() {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -88,7 +92,7 @@ export class NewBathroom extends Component {
   }
 
   validateForm() {
-    return this.state.rating.length > 0 && this.state.review.length > 0;
+    return  this.state.review.length > 0;
   }
 
   handleChange = event => {
@@ -124,11 +128,8 @@ export class NewBathroom extends Component {
   }
   
   createBathroom(bathroom) {
-    //var user_id = this.props.username
-    console.log(bathroom)
-    console.log(this.state.currentLocation)
-    console.log(this.state.address)
-    return API.post("create", `/create_bathroom?username=${this.props.username}&review=${bathroom.review}&rating=${bathroom.rating}&address=${this.state.address}&latitude=${this.state.currentLocation.lat}&longitude=${this.state.currentLocation.lng}`, {      body: bathroom
+    return API.post("create", `/create_bathroom?username=${this.props.username}&review=${bathroom.review}&rating=${bathroom.rating}&address=${this.state.address}&latitude=${this.state.currentLocation.lat}&longitude=${this.state.currentLocation.lng}`, {      
+      body: bathroom
     });
   }
 
@@ -140,13 +141,32 @@ export class NewBathroom extends Component {
     return (
       <div className="NewBathroom">
         <form onSubmit={this.handleSubmit}>
+        <FormGroup controlId="map">
+          <ControlLabel>Map</ControlLabel>
+          <div style={{width: '100%', height: 415}}> 
+          <Map google={this.props.google} zoom={this.props.zoom} style={mapStyles} initialCenter={this.state.currentLocation}>
+            <Marker onClick={this.onMarkerClick} name={this.state.address}/>
+            <InfoWindow marker={this.state.activeMarker} visible={this.state.showingInfoWindow} onClose={this.onClose}>
+              <div>
+                <h4>{this.state.selectedPlace.name}</h4>
+              </div>
+            </InfoWindow>
+          </Map>  
+          </div>    
+          </FormGroup>
+          <FormGroup controlId="Address">
+          <ControlLabel>Address</ControlLabel>
+          <FormControl
+              readOnly={true}
+              value={this.state.address}
+            />
+          </FormGroup>
           <FormGroup controlId="rating">
           <ControlLabel>Rating</ControlLabel>
-            <FormControl
-              onChange={this.handleChange}
-              value={this.state.rating}
-              componentClass="textarea"
-            />
+          
+          <div>
+            <StarRatingComponent name="rate1" starCount={10} value={this.state.rating} onStarClick={this.onStarClick.bind(this)}/>
+          </div>
           </FormGroup>
           <FormGroup controlId="review">
           <ControlLabel>Review</ControlLabel>
@@ -156,30 +176,6 @@ export class NewBathroom extends Component {
               componentClass="textarea"
             />
           </FormGroup>
-          <FormGroup controlId="file">
-            <ControlLabel>Attachment</ControlLabel>
-            <FormControl onChange={this.handleFileChange} type="file" />
-          </FormGroup>
-          <Map
-            google={this.props.google}
-            zoom={14}
-            style={mapStyles}
-            initialCenter={this.state.currentLocation}
-          >
-          <Marker
-          onClick={this.onMarkerClick}
-          name={this.state.address}
-        />
-        <InfoWindow
-          marker={this.state.activeMarker}
-          visible={this.state.showingInfoWindow}
-          onClose={this.onClose}
-        >
-          <div>
-            <h4>{this.state.selectedPlace.name}</h4>
-          </div>
-          </InfoWindow>
-          </Map>
           <LoaderButton
             block
             bsStyle="primary"
