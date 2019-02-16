@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import { FormGroup, FormControl, ControlLabel } from "react-bootstrap";
 import LoaderButton from "../components/LoaderButton";
-import config from "../config";
 import "./NewBathroom.css";
 import { API } from "aws-amplify";
 import { GoogleApiWrapper, InfoWindow, Marker, Map } from 'google-maps-react';
@@ -19,29 +18,25 @@ export class NewBathroom extends Component {
   constructor(props) {
     super(props);
 
-    this.file = null;
     const { lat, lng } = this.props.initialCenter;
     this.state = {
-      isLoading: null,
-      rating: 1,
-      review:  "",
-      address: "Address",
-      error:null,
+      isLoading: null,  //loading for submiting bathroom 
+      rating: 1,        //Rating for the bathroom 1-10
+      review:  "",      // Review for bathroom
+      address: "Address", //the physcial addres for the bathroom
+      error:null,       //store any error messages 
       showingInfoWindow: false,  //Hides or the shows the infoWindow
       activeMarker: {},          //Shows the active marker upon click
       selectedPlace: {},          //Shows the infoWindow to the selected place upon a marker
-      currentLocation: {
+      currentLocation: {      // lattidue and longitude of user current locations
         lat: lat,
         lng: lng
       },
-      isLoadingMap: true
+      isLoadingMap: true    //wait until map is loaded and user location is discovered
     };
 
   }
-
-
-
-
+  //delete this after list is set up
   onMarkerClick = (props, marker, e) =>
     this.setState({
       selectedPlace: props,
@@ -57,11 +52,15 @@ export class NewBathroom extends Component {
       });
     }
   };
+  //chaniges rating value based off user input
   onStarClick(nextValue, prevValue, name) {
     this.setState({rating: nextValue});
   }
+  //first thing called to get the user current location
   componentDidMount() {
+    //check if geolocation is supported
     if (navigator.geolocation) {
+      //get users cuurent location which will be used for bathroom location returning corrdinate object
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const coords = position.coords;
@@ -75,12 +74,14 @@ export class NewBathroom extends Component {
               console.error(error);
             }
           );
+          //set longitude and latidue from postion object
           this.setState({
             currentLocation: {
               lat: coords.latitude,
               lng: coords.longitude
             },
             error: null,
+            //set to false to display current location on map and allow user to create bathroom
             isLoadingMap: false
           });
         },
@@ -90,31 +91,22 @@ export class NewBathroom extends Component {
       );
     }
   }
-
+  //make sure thier is a review given by user before creating bathroom
   validateForm() {
     return  this.state.review.length > 0;
   }
-
+  //if change occured in one of feilds update the value 
   handleChange = event => {
     this.setState({
       [event.target.id]: event.target.value
     });
   }
 
-  handleFileChange = event => {
-    this.file = event.target.files[0];
-  }
-
+  //called when user submits create bathroom request
   handleSubmit = async event => {
     event.preventDefault();
-  
-    if (this.file && this.file.size > config.MAX_ATTACHMENT_SIZE) {
-      alert(`Please pick a file smaller than ${config.MAX_ATTACHMENT_SIZE/1000000} MB.`);
-      return;
-    }
-  
+    //loading is true to show loading image to user while bathroom is created
     this.setState({ isLoading: true });
-  
     try {
       await this.createBathroom({
         rating: this.state.rating,
@@ -126,17 +118,26 @@ export class NewBathroom extends Component {
       this.setState({ isLoading: false });
     }
   }
-  
+  //call lambda function via api gatewate to create new bathroom
   createBathroom(bathroom) {
+    /*
+      parameters sent to api to create new bathroom
+      username: (string)username of person creating the bathroom
+      latitiude: (float) lattidue of bathroom location
+      longitude: (float)  longitude of bathroom location
+      address: (string) pyhscial address of bathroom
+      review: (string) user review of bathroom
+      rating: (int) 1-10 review of bathroom 
+    */
     return API.post("create", `/create_bathroom?username=${this.props.username}&review=${bathroom.review}&rating=${bathroom.rating}&address=${this.state.address}&latitude=${this.state.currentLocation.lat}&longitude=${this.state.currentLocation.lng}`, {      
       body: bathroom
     });
   }
-
+  //render what user will see
   render() {
     //wait till user location is grabed before creating map/view
     if (this.state.isLoadingMap){
-      return null;
+      return "Geolocation is not supported by this browser.";
     }
     return (
       <div className="NewBathroom">
@@ -191,10 +192,11 @@ export class NewBathroom extends Component {
     );
   }
 }
-
+//needed for map
 export default GoogleApiWrapper({
   apiKey: 'AIzaSyCd1aKPVphlEKHiRYbfFAhskWl67Apd6sg'
 })(NewBathroom);
+//default values for map
 NewBathroom.defaultProps = {
   zoom: 14,
   initialCenter: {
