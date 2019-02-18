@@ -4,6 +4,7 @@ import "./Home.css";
 import { API } from "aws-amplify";
 import Geocode from "react-geocode";
 import { GoogleApiWrapper, Marker, Map } from 'google-maps-react';
+import 'react-rangeslider/lib/index.css'
 Geocode.setApiKey('AIzaSyC8nqzSV8q-WBq5IeKMDgUtQDTqeK2F7NA');
 
 const mapStyles = {
@@ -27,7 +28,7 @@ export class Home extends Component {
         lng: lng
       },
       isLoadingMap: true,    //wait until map is loaded and user location is discovered
-      address: null
+      address: null,
     };
   }
   //when user clickks marker bring them update page to show details about bathroom
@@ -36,7 +37,13 @@ export class Home extends Component {
   
   routeChange = (props, marker, e) =>
     this.props.history.push(`bathroom/new`);
-    
+  
+  
+  handleSliderOnChange = (value) => {
+    this.setState({
+      radius: value
+    })
+  }
 
   async componentDidMount() {
     if (!this.props.isAuthenticated) {
@@ -107,8 +114,6 @@ export class Home extends Component {
   }
   //loop through all batrhooms returned from list_bathroom api and display them as clickable markers on map centered at users current location
   renderBathroomsList(bathrooms) {
-    console.log("Response");
-    console.log(bathrooms);
     return (
       <div style={{width: '100%', height: 415}}> 
         <Map google={this.props.google} zoom={this.props.zoom} style={mapStyles} initialCenter={this.state.currentLocation}>
@@ -140,11 +145,13 @@ export class Home extends Component {
   renderBathrooms() {
     return (
       <div className="bathrooms">
+
         <PageHeader>Your Bathrooms in your area</PageHeader>
         <Button color="primary" className="px-4" 
         onClick={this.routeChange}>
         Create New Bathroom
         </Button>
+
         <ListGroup>
           {!this.state.isLoading && this.renderBathroomsList(this.state.bathrooms)}
         </ListGroup>

@@ -40,6 +40,7 @@ def create_bathroom():
         bathroom_entry["Latitude"]		= {"N":str(latitude)}
         bathroom_entry["Longitude"] 	= {"N":str(longitude)}
         bathroom_entry["Rating"]		= {"N":str(rating)}
+        #Reviws will be map of users and thier rating and revieww maped to their user id
         bathroom_entry["Reviews"]		= {"M":{str(user_id):{"M":{"User_Review": {"S": str(review)},"User_Rating": {"N": str(rating)}}}}}#{"M":{str(user_id):{"S":str(review)}}}
         bathroom_entry["Rating_Weight"]	= {"N":str(1)}
         bathroom_entry["Geo_Hash_Key"]	= {"N":str(geo_hash_key)}

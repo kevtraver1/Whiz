@@ -28,13 +28,16 @@ def home():
 		#establish connection to dynomdb table
 		dynamodb = boto3.resource('dynamodb')
 		table = dynamodb.Table(os.environ['WhizBathroomTable'])
+		#need to get existing rating,user that created it, and rating weight
 		response = table.query(KeyConditionExpression=Key('Bathroom_Id').eq(bathroom_id))
 		item = response['Items'][0]
 		rating = item['Rating']
 		rating_weight = item['Rating_Weight']
+		#calculate new rating and new weight
 		new_rating = (rating*rating_weight+int(user_rating))/(rating_weight+1)
 		new_weight = rating_weight+1
 		create_id = item['User_Id']
+		#update rating, weight, update or add review/rating for user  
 		response = table.update_item(
     		Key={
         		'Bathroom_Id': bathroom_id,
