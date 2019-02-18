@@ -32,10 +32,21 @@ Amplify.configure({
           region: config.create_api_gateway.REGION
         },
         {
+          name: "get",
+          endpoint: config.get_api_gateway.URL,
+          region: config.get_api_gateway.REGION
+        },        
+        {
+          name: "update",
+          endpoint: config.update_api_gateway.URL,
+          region: config.update_api_gateway.REGION
+        },
+        {
           name: "app",
           endpoint: config.app_api_gateway.URL,
           region: config.app_api_gateway.REGION
         },
+
       ]
     }
   });

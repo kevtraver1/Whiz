@@ -112,7 +112,7 @@ export class NewBathroom extends Component {
         rating: this.state.rating,
         review:  this.state.review,
       });
-      //this.props.history.push("/");
+      this.props.history.push("/");
     } catch (e) {
       alert(e);
       this.setState({ isLoading: false });
@@ -137,7 +137,7 @@ export class NewBathroom extends Component {
   render() {
     //wait till user location is grabed before creating map/view
     if (this.state.isLoadingMap){
-      return "Geolocation is not supported by this browser.";
+      return "Geolocation is not supported by this browser or error occured getting you location. Please Refresh the page.";
     }
     return (
       <div className="NewBathroom">

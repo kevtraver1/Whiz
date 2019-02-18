@@ -48,21 +48,21 @@ def calculate_geo_hash(latidue,longitude,precession,result_type):
         return based on result type but will be geohash for latitude and longitude and lenght of hash based off preccssion
     """
     #intate varibales needed for geo-hash calcualtions
-    geo_hash = ""
-    max_lat = 90.0
-    min_lat = -90.0
-    max_long = 180.0
-    min_long = -180.0
-    base32 = '0123456789bcdefghjkmnpqrstuvwxyz'
-    evenBit = True
-    bits = 0
-    index = 0
-    result = False
-    geo_bits = ""
+    geo_hash    = "" #geo hash base 32
+    base32      = '0123456789bcdefghjkmnpqrstuvwxyz'
+    geo_bits    = "" #geo hash base 2
+    max_lat     = 90.0
+    min_lat     = -90.0
+    max_long    = 180.0
+    min_long    = -180.0
+    latlng_flag = True #swap between longitude and latiude flag
+    bits        = 0
+    index       = 0
+    result      = None
     #loop until geo_hash has reached desired precession
     while len(geo_hash)<precession:
         #alternate bewteen longitude bits and latitude bits, even for long and odd for lat of each bit
-        if evenBit:
+        if latlng_flag:
             #bisect E-W longitude
             #calcualte mid point between current min max longitude
             mid_long = (min_long+max_long)/2
@@ -90,7 +90,7 @@ def calculate_geo_hash(latidue,longitude,precession,result_type):
                 max_lat = mid_lat
                 geo_bits += "0"
         #flip to go between longitude and latitde 
-        evenBit = not evenBit
+        latlng_flag = not latlng_flag
         
         #to genearte hash base 32
         bits += 1
@@ -109,4 +109,4 @@ def calculate_geo_hash(latidue,longitude,precession,result_type):
     return result
 
 if __name__=="__main__":
-	app.run()
+    app.run()

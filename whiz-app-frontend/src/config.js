@@ -11,6 +11,14 @@ export default {
     create_api_gateway: {
       REGION: "us-east-1",
       URL: "https://wdi41mc2z1.execute-api.us-east-1.amazonaws.com/create/"
+    },    
+    get_api_gateway: {
+      REGION: "us-east-1",
+      URL: "https://q45qa4zsoi.execute-api.us-east-1.amazonaws.com/get/"
+    },
+    update_api_gateway: {
+      REGION: "us-east-1",
+      URL: "https://fmuxo83sv7.execute-api.us-east-1.amazonaws.com/update"
     },
     app_api_gateway: {
       REGION: "us-east-1",
