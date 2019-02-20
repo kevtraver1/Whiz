@@ -3,26 +3,19 @@ This project makes uses AWS S3, Cognito, Lambda, DynamoDB, React Libary and pyth
 Whiz
  Whiz is a clone of Waze. The app allows users to locate bathrooms near the current location,after creating authenticated accounts. User will get email to verify that email is real, and userdata is stored using AWS cognito. It allows users to add new bathrooms with comments and rating 1-10. Users can click and view all user reviews and ratings for the bathroom and can add review aswell. Whiz is built react web-app, with python backend hosted in AWS cloud.
 
+Sign UP View
 ![Alt text](/assets/Signup.png?raw=true "SignUp View")
+Login View
 ![Alt text](/assets/Login.png?raw=true "Login View")
+Create New Bathroom View
 ![Alt text](/assets/Create_Bathroom.png?raw=true "Create New Bathroom View")
+Home Map View
 ![Alt text](/assets/Map.png?raw=true "Home Map View")
+Bathroom Review and Ratings View
 ![Alt text](/assets/Bathroom_Review.png?raw=true "Bathroom review View")
 
 Reflection
 
-What was the context for this project? (ie: was this a side project? was this for Turing? was this for an experiment?)
-What did you set out to build?
-Why was this project challenging and therefore a really good learning experience?
-What were some unexpected obstacles?
-What tools did you use to implement this project?
-This might seem obvious because you are IN this codebase, but to all other humans now is the time to talk about why you chose webpack instead of create react app, or D3, or vanilla JS instead of a framework etc. Brag about your choices and justify them here.
-Example:
+This was a side project, to teach my self AWS S3, Cognito, Lambda, DynamoDB, React Libary and flask. Also i wanted to familiarizing myself with documentation of AWS. I started this by using create-react-app boilder plate and  some of the key aws services to teach my self how to architect and develop in the cloud. This was something that always seemed interesting to me. I learned how usefull lambda is, how to use a nosql database, and basic of react, this is why i chose a simple conecpt for this project. I did encounter some unforseen obstlces along the way. One of the main challenges I ran into was Authentication. This lead me to spend a few days on a research spike into OAuth, Auth0, and finaly i found that AWS has cognito which helped me handle this challege. Near the end i realized that the navigator.geolocation does not always work and if i ever come back to this project to add more features i will need find a better way to find users location. Another issue was that my expericne with javascript was limited and had some issue with the frontend becasue of this. But once i realized all my issues were because javascript is asynchronous when calling my lambda API, i was able to reslove my problem of javascript running without waiting for response.
+I chose to use the create-react-app boilerplate to minimize initial setup and used python since im experinced with the language to invest more time in diving into AWS technological.
 
-This was a 3 week long project built during my third module at Turing School of Software and Design. Project goals included using technologies learned up until this point and familiarizing myself with documentation for new features.
-
-Originally I wanted to build an application that allowed users to pull data from the Twitter API based on what they were interested in, such as 'most tagged users'. I started this process by using the create-react-app boilerplate, then adding react-router-4.0 and redux.
-
-One of the main challenges I ran into was Authentication. This lead me to spend a few days on a research spike into OAuth, Auth0, and two-factor authentication using Firebase or other third parties. Due to project time constraints, I had to table authentication and focus more on data visualization from parts of the API that weren't restricted to authenticated users.
-
-At the end of the day, the technologies implemented in this project are React, React-Router 4.0, Redux, LoDash, D3, and a significant amount of VanillaJS, JSX, and CSS. I chose to use the create-react-app boilerplate to minimize initial setup and invest more time in diving into weird technological rabbit holes. In the next iteration I plan on handrolling a webpack.config.js file to more fully understand the build process.
