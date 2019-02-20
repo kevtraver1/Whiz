@@ -4,6 +4,10 @@ Whiz
  Whiz is a clone of Waze. The app allows users to locate bathrooms near the current location,after creating authenticated accounts. User will get email to verify that email is real, and userdata is stored using AWS cognito. It allows users to add new bathrooms with comments and rating 1-10. Users can click and view all user reviews and ratings for the bathroom and can add review aswell. Whiz is built react web-app, with python backend hosted in AWS cloud.
 
 ![Alt text](/assets/Signup.png?raw=true "SignUp View")
+![Alt text](/assets/Login.png?raw=true "Login View")
+![Alt text](/assets/Create_Bathroom.png?raw=true "Create New Bathroom View")
+![Alt text](/assets/Map.png?raw=true "Home Map View")
+![Alt text](/assets/Bathroom_Review.png?raw=true "Bathroom review View")
 
 Reflection
 
