@@ -4,7 +4,6 @@ import "./Home.css";
 import { API } from "aws-amplify";
 import Geocode from "react-geocode";
 import { GoogleApiWrapper, Marker, Map } from 'google-maps-react';
-import 'react-rangeslider/lib/index.css'
 Geocode.setApiKey('AIzaSyC8nqzSV8q-WBq5IeKMDgUtQDTqeK2F7NA');
 
 const mapStyles = {
@@ -17,8 +16,8 @@ export class Home extends Component {
     super(props);
     const { lat, lng } = this.props.initialCenter;
     this.state = {
-      isLoading: true,
-      bathrooms: [],
+      isLoading: true,//if loading data this is true
+      bathrooms: [],//list of all batrhooms returned from api call
       radius: 10,      //default radius is 10 miles
       showingInfoWindow: false,  //Hides or the shows the infoWindow
       activeMarker: {},          //Shows the active marker upon click
@@ -34,22 +33,20 @@ export class Home extends Component {
   //when user clickks marker bring them update page to show details about bathroom
   onMarkerClick = (props, marker, e) =>
   this.props.history.push(marker.to);
-  
+  //when user wants to add new bathroom this will bring them to that page
   routeChange = (props, marker, e) =>
     this.props.history.push(`bathroom/new`);
   
   
-  handleSliderOnChange = (value) => {
-    this.setState({
-      radius: value
-    })
-  }
 
+  //when page loads 
   async componentDidMount() {
+    //check if users is authenticated
     if (!this.props.isAuthenticated) {
       return;
     }
     try {
+      //get uses location and set states values wiht result
       this.getUserLocation();
 
     } catch (e) {
@@ -94,6 +91,7 @@ export class Home extends Component {
 
     }
   }
+  //get all bathroms with in a range
   async getBathrooms(){
     try {
       const bathrooms = await this.bathrooms();
@@ -102,7 +100,7 @@ export class Home extends Component {
     } catch (e) {
       alert(e);
     }
-  
+    //done laoding data and can show full page
     this.setState({ isLoading: false });
   }
   //get list of all bathrooms within mile radius of users current location
@@ -114,6 +112,8 @@ export class Home extends Component {
   }
   //loop through all batrhooms returned from list_bathroom api and display them as clickable markers on map centered at users current location
   renderBathroomsList(bathrooms) {
+    //create map using google ract maps and add markers based off location returned from api
+    //if marker clicked will show you data about the page
     return (
       <div style={{width: '100%', height: 415}}> 
         <Map google={this.props.google} zoom={this.props.zoom} style={mapStyles} initialCenter={this.state.currentLocation}>
@@ -141,7 +141,7 @@ export class Home extends Component {
       </div>
     );
   }
-
+  //What user will see
   renderBathrooms() {
     return (
       <div className="bathrooms">
@@ -180,8 +180,8 @@ export default GoogleApiWrapper({
 })(Home);
 //default values for map
 Home.defaultProps = {
-  zoom: 14,
-  initialCenter: {
+  zoom: 14,//default map z00m
+  initialCenter: {//where the map initaly will center 
     lat: 50.7128,
     lng: -80.0060
   },

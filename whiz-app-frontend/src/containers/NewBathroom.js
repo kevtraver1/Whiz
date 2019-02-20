@@ -198,8 +198,8 @@ export default GoogleApiWrapper({
 })(NewBathroom);
 //default values for map
 NewBathroom.defaultProps = {
-  zoom: 14,
-  initialCenter: {
+  zoom: 14,//default map z00m
+  initialCenter: {//where the map initaly will center 
     lat: 50.7128,
     lng: -80.0060
   },

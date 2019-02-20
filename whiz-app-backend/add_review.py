@@ -33,7 +33,7 @@ def home():
 		item = response['Items'][0]
 		rating = item['Rating']
 		rating_weight = item['Rating_Weight']
-		#calculate new rating and new weight
+		#calculate new rating and new weight by adding new rating to weighted rating
 		new_rating = (rating*rating_weight+int(user_rating))/(rating_weight+1)
 		new_weight = rating_weight+1
 		create_id = item['User_Id']

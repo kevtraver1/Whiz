@@ -32,9 +32,7 @@ def list_bathrooms():
 	response    = table.query(IndexName=index_name,KeyConditionExpression=Key('Geo_Hash_Key').eq(geo_hash_key)& Key('Geo_Hash').between(geo_hash-radius, geo_hash+radius))
 	return json.dumps(response['Items'])
 	
-#convert radius in miles to geo_hash radius
-def convert_radius(radius):
-	pass
+
 #calcualte geo_hash based on users longitude,latitude,and pression
 def calculate_geo_hash(latidue,longitude,precession,result_type):
     """
